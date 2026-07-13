@@ -1,0 +1,132 @@
+/*
+ * Scout Suite Waiting List form styles.
+ *
+ * Deliberately light touch: fonts, colours and input styling are inherited
+ * from the active theme so the form blends in anywhere. Only layout and
+ * the notice states are opinionated.
+ */
+
+.sswl-wrap {
+	max-width: 40rem;
+}
+
+.sswl-form .sswl-fieldset {
+	border: 1px solid currentColor;
+	border-radius: 4px;
+	padding: 1rem 1.25rem;
+	margin: 0 0 1.5rem;
+	opacity: 1;
+}
+
+.sswl-form legend {
+	font-weight: 600;
+	padding: 0 0.5rem;
+}
+
+.sswl-field {
+	margin: 0 0 1rem;
+}
+
+.sswl-field label {
+	display: block;
+	margin-bottom: 0.25rem;
+	font-weight: 600;
+}
+
+.sswl-field input[type="text"],
+.sswl-field input[type="email"],
+.sswl-field input[type="tel"],
+.sswl-field input[type="date"],
+.sswl-field select,
+.sswl-field textarea {
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.sswl-field .sswl-input-short {
+	max-width: 12rem;
+}
+
+/* Two columns on wider screens, stacked on small ones. */
+.sswl-row-2col {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0 1rem;
+}
+
+@media (max-width: 600px) {
+	.sswl-row-2col {
+		grid-template-columns: 1fr;
+	}
+}
+
+.sswl-field-checkbox label {
+	display: inline;
+	font-weight: 400;
+}
+
+.sswl-field-checkbox input[type="checkbox"] {
+	margin-right: 0.4rem;
+}
+
+.sswl-required {
+	color: #b32d2e;
+}
+
+.sswl-field-error {
+	display: block;
+	margin-top: 0.25rem;
+	font-size: 0.875em;
+	color: #b32d2e;
+}
+
+.sswl-privacy-notice {
+	font-size: 0.875em;
+	opacity: 0.85;
+}
+
+.sswl-consent {
+	margin-bottom: 1.5rem;
+}
+
+/* The button inherits the theme's button styling where possible. */
+.sswl-button {
+	cursor: pointer;
+}
+
+.sswl-notice {
+	padding: 0.75rem 1rem;
+	border-radius: 4px;
+	margin: 0 0 1.25rem;
+	border: 1px solid;
+}
+
+.sswl-notice-success {
+	background-color: #edf7ed;
+	border-color: #2e7d32;
+	color: #1e4620;
+}
+
+.sswl-notice-error {
+	background-color: #fdeded;
+	border-color: #b32d2e;
+	color: #5f2120;
+}
+
+/* Honeypot field: visually removed but still present for bots. */
+.sswl-hp {
+	position: absolute !important;
+	left: -9999px !important;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+/* Editor placeholder for the Gutenberg block. */
+.sswl-block-placeholder {
+	border: 1px dashed currentColor;
+	border-radius: 4px;
+	padding: 1rem 1.25rem;
+	opacity: 0.8;
+}
