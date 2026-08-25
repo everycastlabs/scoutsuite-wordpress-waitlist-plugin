@@ -33,7 +33,7 @@
 				el(
 					'p',
 					{},
-					__( 'The waiting list form appears here on the published page. Configure it under Settings, Scout Suite Waiting List.', 'scoutsuite-waitlist' )
+					__( 'The waiting list form appears here on the published page. Configure it under Settings, Scout Suite. Use this block on a Group site, not as a District Group picker.', 'scoutsuite-waitlist' )
 				)
 			);
 		},

@@ -36,11 +36,11 @@ class ScoutSuite_Waitlist_Form {
 
 		wp_enqueue_style( 'scoutsuite-waitlist' );
 
-		if ( '' === trim( $options['group_id'] ) ) {
+		if ( '' === trim( $options['org_id'] ) ) {
 			// Tell editors what is missing; show nothing to visitors.
 			if ( current_user_can( 'manage_options' ) ) {
 				return '<div class="sswl-notice sswl-notice-error">'
-					. esc_html__( 'Scout Suite Waiting List: set your Group ID under Settings, Scout Suite Waiting List. Only administrators see this message.', 'scoutsuite-waitlist' )
+					. esc_html__( 'Scout Suite: set your Org ID under Settings, Scout Suite. Only administrators see this message.', 'scoutsuite-waitlist' )
 					. '</div>';
 			}
 			return '';
@@ -266,10 +266,11 @@ class ScoutSuite_Waitlist_Form {
 
 		// Build the API payload. Optional fields are only sent when filled in.
 		$payload = array(
-			'firstName'  => $input['first_name'],
-			'lastName'   => $input['last_name'],
-			'parentName' => $input['parent_name'],
+			'firstName'   => $input['first_name'],
+			'lastName'    => $input['last_name'],
+			'parentName'  => $input['parent_name'],
 			'parentEmail' => $input['parent_email'],
+			'source'      => 'wordpress',
 		);
 
 		if ( '' !== $input['dob'] ) {
@@ -294,9 +295,8 @@ class ScoutSuite_Waitlist_Form {
 		);
 		$payload['notes'] = '' !== $input['notes'] ? $input['notes'] . "\n\n" . $consent_note : $consent_note;
 
-		$options = scoutsuite_waitlist_get_options();
-		$api     = new ScoutSuite_Waitlist_API( $options['api_key'], $options['group_id'] );
-		$result  = $api->submit_entry( $payload );
+		$api    = scoutsuite_waitlist_get_api();
+		$result = $api->submit_entry( $payload );
 
 		if ( $result['success'] ) {
 			$this->redirect_with_feedback( $redirect, array( 'status' => 'success' ) );
@@ -363,7 +363,7 @@ class ScoutSuite_Waitlist_Form {
 			return array_filter( array_map( 'trim', explode( "\n", $options['sections_override'] ) ) );
 		}
 
-		$api  = new ScoutSuite_Waitlist_API( $options['api_key'], $options['group_id'] );
+		$api  = scoutsuite_waitlist_get_api();
 		$info = $api->get_signup_info();
 
 		return ! empty( $info['sections'] ) ? $info['sections'] : array();
