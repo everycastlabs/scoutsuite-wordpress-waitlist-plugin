@@ -75,11 +75,44 @@ To build the installable zip from a checkout:
 zip -r scout-suite-waiting-list.zip scout-suite-waiting-list -x "*.DS_Store"
 ```
 
+## Local demo (Docker)
+
+A District-style WordPress with WP Store Locator, The Events Calendar (plus Event Tickets, Events Shortcodes, and Events Block), a Scout-branded classic theme, Leaflet (no Google Maps), and this plugin mounted from the checkout:
+
+```sh
+cd demo
+docker compose up -d
+```
+
+If a local Scout Suite API is up (`wrangler dev` on 8787, or the video-walkthrough servers on 8790), the seed job creates a District, three Groups with HQ pins, two public events, an API key, and runs **Sync now**. You do not paste an org id or key.
+
+- Site: http://localhost:8888
+- Admin: http://localhost:8888/wp-admin (`admin` / `scoutsuite`)
+- Find a Group: http://localhost:8888/find-a-group/
+- What's on: http://localhost:8888/whats-on/
+- Waiting list form: http://localhost:8888/join-the-waiting-list/
+- TEC archive (unthemed CPT): http://localhost:8888/events/
+
+Re-run seed after the API comes up, or to refresh Groups/events:
+
+```sh
+docker compose run --rm seed
+```
+
+The video walkthrough `wordpress-website` does the same from `pnpm video:record wordpress-website` — Docker, Scout Suite data, plugin settings, and sync are all in `setup()`. `wordpress-waiting-list` uses the same site with `SCOUTSUITE_WAITLIST_GROUP_ID` pointing at a Group.
+
+Find a Group uses **Leaflet**. Server-side WPSL geocoding is [postcodes.io](https://postcodes.io/), not Google. That lives in the **Skills for Life child** at [everycastlabs/sfl-wordpress-child-theme](https://github.com/everycastlabs/sfl-wordpress-child-theme) — seed clones it into `wp-content/themes/skillsforlife-child`. The demo parent in `demo/themes/skillsforlife` is Scout-branded chrome for recordings (purple header, Find a Group / What's on nav). Real district sites should use the Mersey Weaver Skills for Life zip as the parent.
+
+What's on is a **page** (`/whats-on/`) using **Events Shortcodes for The Events Calendar** (`[events-calendar-templates …]`). Events themselves are still `tribe_events` from The Events Calendar — the shortcode (or the Events Block) is how most Scout sites list them on a themed page rather than the default `/events/` archive. Event Tickets is installed alongside, matching typical stacks.
+
+`SCOUTSUITE_API_BASE_URL` defaults to `http://host.docker.internal:8787`. Use port `8790` on the video-walkthrough servers.
+
 ## Settings
 
 | Setting | Purpose |
 |---|---|
 | Org ID | District, County, or Group ID from Scout Suite (the same id leaders see in URLs). Required. Existing installs that stored this as Group ID keep working. |
+| Waiting list Group ID | Group the `[scoutsuite_waitlist]` form posts to. Needed when Org ID is a District or County. |
 | API key | Bearer token `ss_at_…` from the Scout Suite developer portal. Stored server side only. Required for directory/events sync; optional for the public form. |
 | API base URL | Defaults to `https://api.scoutsuite.app`. Override for staging. |
 | Sections | One per line to override the list fetched from Scout Suite. Leave blank to fetch automatically. |

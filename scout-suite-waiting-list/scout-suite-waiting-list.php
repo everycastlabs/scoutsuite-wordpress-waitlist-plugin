@@ -45,7 +45,7 @@ function scoutsuite_waitlist_get_options() {
 	$defaults = array(
 		'api_key'           => '',
 		'org_id'            => '',
-		'group_id'          => '',
+		'waitlist_group_id' => '',
 		'api_base_url'      => ScoutSuite_Waitlist_API::DEFAULT_BASE_URL,
 		'sections_override' => '',
 		'privacy_notice'    => __( 'We use the details you provide only to manage our waiting list and to contact you about a place for your child. We store them securely in Scout Suite, our membership system, and we do not share them with anyone else. You can ask us to remove your details at any time.', 'scoutsuite-waitlist' ),
@@ -71,6 +71,30 @@ function scoutsuite_waitlist_get_options() {
 	$options['api_base_url'] = ScoutSuite_Waitlist_API::normalise_base_url( $options['api_base_url'] );
 
 	return $options;
+}
+
+function scoutsuite_waitlist_signup_org_id() {
+	$options = scoutsuite_waitlist_get_options();
+	$waitlist = trim( (string) ( $options['waitlist_group_id'] ?? '' ) );
+	if ( '' !== $waitlist ) {
+		return $waitlist;
+	}
+	return trim( (string) $options['org_id'] );
+}
+
+/**
+ * API client for the public waiting-list form (always a Group id).
+ *
+ * @return ScoutSuite_Waitlist_API
+ */
+function scoutsuite_waitlist_get_signup_api() {
+	$options = scoutsuite_waitlist_get_options();
+
+	return new ScoutSuite_Waitlist_API(
+		$options['api_key'],
+		scoutsuite_waitlist_signup_org_id(),
+		$options['api_base_url']
+	);
 }
 
 /**

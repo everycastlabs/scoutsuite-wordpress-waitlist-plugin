@@ -59,6 +59,14 @@ class ScoutSuite_Waitlist_Settings {
 		);
 
 		add_settings_field(
+			'waitlist_group_id',
+			__( 'Waiting list Group ID', 'scoutsuite-waitlist' ),
+			array( $this, 'render_waitlist_group_id_field' ),
+			'scoutsuite-waitlist',
+			'scoutsuite_waitlist_connection'
+		);
+
+		add_settings_field(
 			'api_key',
 			__( 'API key', 'scoutsuite-waitlist' ),
 			array( $this, 'render_api_key_field' ),
@@ -138,6 +146,9 @@ class ScoutSuite_Waitlist_Settings {
 
 		$clean['org_id']   = $org_id;
 		$clean['group_id'] = $org_id;
+		$clean['waitlist_group_id'] = isset( $input['waitlist_group_id'] )
+			? sanitize_text_field( $input['waitlist_group_id'] )
+			: '';
 		$clean['api_key']  = isset( $input['api_key'] ) ? sanitize_text_field( $input['api_key'] ) : '';
 
 		$base = isset( $input['api_base_url'] ) ? esc_url_raw( trim( (string) $input['api_base_url'] ) ) : '';
@@ -195,7 +206,17 @@ class ScoutSuite_Waitlist_Settings {
 			esc_attr( SCOUTSUITE_WAITLIST_OPTION ),
 			esc_attr( $options['org_id'] )
 		);
-		echo '<p class="description">' . esc_html__( 'District, County, or Group ID from Scout Suite. Required.', 'scoutsuite-waitlist' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'District, County, or Group ID from Scout Suite. Directory and events sync use this id. Required.', 'scoutsuite-waitlist' ) . '</p>';
+	}
+
+	public function render_waitlist_group_id_field() {
+		$options = scoutsuite_waitlist_get_options();
+		printf(
+			'<input type="text" class="regular-text" name="%s[waitlist_group_id]" value="%s" autocomplete="off" />',
+			esc_attr( SCOUTSUITE_WAITLIST_OPTION ),
+			esc_attr( (string) ( $options['waitlist_group_id'] ?? '' ) )
+		);
+		echo '<p class="description">' . esc_html__( 'Group ID for the [scoutsuite_waitlist] form. Needed on a District site if the form should post to one Group. Leave blank to use the Org ID (a Group site).', 'scoutsuite-waitlist' ) . '</p>';
 	}
 
 	public function render_api_key_field() {

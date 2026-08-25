@@ -114,17 +114,37 @@ class ScoutSuite_Waitlist_Events {
 		if ( '' === $end_local ) {
 			$end_local = $start_local;
 		}
+		$start_utc = self::format_utc_datetime( $start, $timezone, $all_day );
+		$end_utc   = self::format_utc_datetime( $end, $timezone, $all_day );
+		if ( '' === $end_utc ) {
+			$end_utc = $start_utc;
+		}
 
 		$is_create = ( 0 === $existing );
 		$post_id   = $existing;
 
+		// TEC 6 only treats a date as "provided" when start/end times are
+		// split out. A combined Y-m-d H:i:s EventStartDate is parsed then
+		// discarded, UTC is never written, and the custom-tables upsert
+		// fails with "start_date_utc requires a value".
+		$start_parts = self::split_local_datetime( $start_local );
+		$end_parts   = self::split_local_datetime( $end_local );
+
 		$args = array(
-			'post_title'     => $title,
-			'post_status'    => 'publish',
-			'EventStartDate' => $start_local,
-			'EventEndDate'   => $end_local,
-			'EventAllDay'    => $all_day,
-			'EventTimezone'  => $timezone,
+			'post_title'        => $title,
+			'post_status'       => 'publish',
+			'EventStartDate'    => $start_parts['date'],
+			'EventEndDate'      => $end_parts['date'],
+			'EventStartTime'    => $start_parts['time'],
+			'EventEndTime'      => $end_parts['time'],
+			'EventStartHour'    => $start_parts['hour'],
+			'EventStartMinute'  => $start_parts['minute'],
+			'EventEndHour'      => $end_parts['hour'],
+			'EventEndMinute'    => $end_parts['minute'],
+			'EventAllDay'       => $all_day ? 'yes' : 'no',
+			'EventTimezone'     => $timezone,
+			'EventStartDateUTC' => $start_utc,
+			'EventEndDateUTC'   => $end_utc,
 		);
 
 		if ( $is_create ) {
@@ -146,6 +166,8 @@ class ScoutSuite_Waitlist_Events {
 		if ( $post_id < 1 ) {
 			return new WP_Error( 'event_save_failed', sprintf( /* translators: %s: Scout Suite event id */ __( 'Could not save event %s.', 'scoutsuite-waitlist' ), $event_id ) );
 		}
+
+		self::persist_tec_dates( $post_id, $start_local, $end_local, $start_utc, $end_utc, $timezone, $all_day );
 
 		update_post_meta( $post_id, self::META_EVENT_ID, $event_id );
 		update_post_meta( $post_id, self::META_SYNC_STATUS, 'synced' );
@@ -222,6 +244,12 @@ class ScoutSuite_Waitlist_Events {
 		$result = (int) $result;
 		update_post_meta( $result, '_EventStartDate', $args['EventStartDate'] );
 		update_post_meta( $result, '_EventEndDate', $args['EventEndDate'] );
+		if ( ! empty( $args['EventStartDateUTC'] ) ) {
+			update_post_meta( $result, '_EventStartDateUTC', $args['EventStartDateUTC'] );
+		}
+		if ( ! empty( $args['EventEndDateUTC'] ) ) {
+			update_post_meta( $result, '_EventEndDateUTC', $args['EventEndDateUTC'] );
+		}
 		update_post_meta( $result, '_EventAllDay', ! empty( $args['EventAllDay'] ) ? 'yes' : 'no' );
 		update_post_meta( $result, '_EventTimezone', $args['EventTimezone'] );
 
@@ -307,10 +335,114 @@ class ScoutSuite_Waitlist_Events {
 			if ( false === $ts ) {
 				return '';
 			}
-			return $all_day ? gmdate( 'Y-m-d', $ts ) : gmdate( 'Y-m-d H:i:s', $ts );
+			return gmdate( 'Y-m-d H:i:s', $ts );
 		}
 
-		return $all_day ? $dt->format( 'Y-m-d' ) : $dt->format( 'Y-m-d H:i:s' );
+		return $dt->format( 'Y-m-d H:i:s' );
+	}
+
+	/**
+	 * Split a local datetime into the pieces tribe_create_event expects.
+	 *
+	 * @param string $value Y-m-d H:i:s
+	 * @return array{date:string,time:string,hour:string,minute:string}
+	 */
+	private static function split_local_datetime( $value ) {
+		try {
+			$dt = new DateTimeImmutable( (string) $value );
+		} catch ( Exception $e ) {
+			$ts = strtotime( (string) $value );
+			$dt = new DateTimeImmutable( false === $ts ? 'now' : '@' . $ts );
+		}
+
+		return array(
+			'date'   => $dt->format( 'Y-m-d' ),
+			'time'   => $dt->format( 'H:i:s' ),
+			'hour'   => $dt->format( 'H' ),
+			'minute' => $dt->format( 'i' ),
+		);
+	}
+
+	/**
+	 * Write date meta TEC's custom tables actually read, then rebuild them.
+	 *
+	 * @param int    $post_id
+	 * @param string $start_local
+	 * @param string $end_local
+	 * @param string $start_utc
+	 * @param string $end_utc
+	 * @param string $timezone
+	 * @param bool   $all_day
+	 * @return void
+	 */
+	private static function persist_tec_dates( $post_id, $start_local, $end_local, $start_utc, $end_utc, $timezone, $all_day ) {
+		$post_id = (int) $post_id;
+		if ( $post_id < 1 ) {
+			return;
+		}
+
+		update_post_meta( $post_id, '_EventStartDate', $start_local );
+		update_post_meta( $post_id, '_EventEndDate', $end_local );
+		update_post_meta( $post_id, '_EventStartDateUTC', $start_utc );
+		update_post_meta( $post_id, '_EventEndDateUTC', $end_utc );
+		update_post_meta( $post_id, '_EventTimezone', $timezone );
+		update_post_meta( $post_id, '_EventAllDay', $all_day ? 'yes' : 'no' );
+
+		$start_ts = strtotime( $start_utc . ' UTC' );
+		$end_ts   = strtotime( $end_utc . ' UTC' );
+		if ( false !== $start_ts && false !== $end_ts && $end_ts >= $start_ts ) {
+			update_post_meta( $post_id, '_EventDuration', (string) ( $end_ts - $start_ts ) );
+		}
+
+		if ( ! class_exists( '\TEC\Events\Custom_Tables\V1\Updates\Events' ) ) {
+			return;
+		}
+
+		try {
+			if ( function_exists( 'tribe' ) ) {
+				$updater = tribe( \TEC\Events\Custom_Tables\V1\Updates\Events::class );
+			} else {
+				$updater = new \TEC\Events\Custom_Tables\V1\Updates\Events();
+			}
+			if ( $updater && method_exists( $updater, 'update' ) ) {
+				$updater->update( $post_id );
+			}
+		} catch ( Exception $e ) {
+			return;
+		}
+	}
+
+	/**
+	 * UTC companion for TEC custom tables (start_date_utc).
+	 *
+	 * @param string $value
+	 * @param string $timezone
+	 * @param bool   $all_day
+	 * @return string
+	 */
+	private static function format_utc_datetime( $value, $timezone, $all_day ) {
+		$value = trim( (string) $value );
+		if ( '' === $value ) {
+			return '';
+		}
+
+		try {
+			if ( preg_match( '/Z$|[+\-]\d{2}:\d{2}$/', $value ) ) {
+				$dt = new DateTimeImmutable( $value );
+			} else {
+				$tz = timezone_open( $timezone );
+				$dt = new DateTimeImmutable( $value, $tz ? $tz : wp_timezone() );
+			}
+			$dt = $dt->setTimezone( new DateTimeZone( 'UTC' ) );
+		} catch ( Exception $e ) {
+			$ts = strtotime( $value );
+			if ( false === $ts ) {
+				return '';
+			}
+			return gmdate( 'Y-m-d H:i:s', $ts );
+		}
+
+		return $dt->format( 'Y-m-d H:i:s' );
 	}
 
 	/**

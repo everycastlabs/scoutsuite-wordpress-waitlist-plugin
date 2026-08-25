@@ -36,7 +36,7 @@ class ScoutSuite_Waitlist_Form {
 
 		wp_enqueue_style( 'scoutsuite-waitlist' );
 
-		if ( '' === trim( $options['org_id'] ) ) {
+		if ( '' === trim( $options['org_id'] ) && '' === trim( (string) ( $options['waitlist_group_id'] ?? '' ) ) ) {
 			// Tell editors what is missing; show nothing to visitors.
 			if ( current_user_can( 'manage_options' ) ) {
 				return '<div class="sswl-notice sswl-notice-error">'
@@ -295,7 +295,7 @@ class ScoutSuite_Waitlist_Form {
 		);
 		$payload['notes'] = '' !== $input['notes'] ? $input['notes'] . "\n\n" . $consent_note : $consent_note;
 
-		$api    = scoutsuite_waitlist_get_api();
+		$api    = scoutsuite_waitlist_get_signup_api();
 		$result = $api->submit_entry( $payload );
 
 		if ( $result['success'] ) {
@@ -363,7 +363,7 @@ class ScoutSuite_Waitlist_Form {
 			return array_filter( array_map( 'trim', explode( "\n", $options['sections_override'] ) ) );
 		}
 
-		$api  = scoutsuite_waitlist_get_api();
+		$api  = scoutsuite_waitlist_get_signup_api();
 		$info = $api->get_signup_info();
 
 		return ! empty( $info['sections'] ) ? $info['sections'] : array();

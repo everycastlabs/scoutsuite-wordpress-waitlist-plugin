@@ -1,0 +1,232 @@
+/*
+Theme Name: Skills for Life
+Description: Scout-branded classic parent for the local Docker demo (and for the Skills for Life child). Real district sites should use the Mersey Weaver Skills for Life zip; this ships the public Scout colours, header and nav so walkthroughs are not recorded on Twenty Twenty-Five.
+Version: 0.2.0
+Text Domain: skillsforlife
+*/
+
+:root {
+  --sfl-purple: #7413dc;
+  --sfl-purple-dark: #490c8a;
+  --sfl-teal: #00a794;
+  --sfl-navy: #1c242b;
+  --sfl-ink: #1c242b;
+  --sfl-muted: #5c6570;
+  --sfl-paper: #f6f4f0;
+  --sfl-white: #ffffff;
+  --sfl-max: 72rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 18px;
+}
+
+body.sfl-body {
+  margin: 0;
+  color: var(--sfl-ink);
+  background: var(--sfl-paper);
+  font-family: "Nunito Sans", "Trebuchet MS", "Segoe UI", sans-serif;
+  line-height: 1.55;
+}
+
+a {
+  color: var(--sfl-purple);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.sfl-skip {
+  position: absolute;
+  left: -999px;
+}
+
+.sfl-topbar {
+  background: var(--sfl-purple);
+  color: var(--sfl-white);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.35rem 1.25rem;
+}
+
+.sfl-topbar span {
+  display: block;
+  max-width: var(--sfl-max);
+  margin: 0 auto;
+}
+
+.sfl-header {
+  background: var(--sfl-white);
+  border-bottom: 4px solid var(--sfl-teal);
+}
+
+.sfl-header-inner {
+  max-width: var(--sfl-max);
+  margin: 0 auto;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.sfl-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: var(--sfl-ink);
+}
+
+.sfl-fleur {
+  width: 2.6rem;
+  height: 2.6rem;
+  flex: none;
+}
+
+.sfl-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.sfl-brand-kicker {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sfl-purple);
+}
+
+.sfl-brand-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.sfl-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 0.35rem;
+}
+
+.sfl-nav a {
+  display: inline-block;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  text-decoration: none;
+  color: var(--sfl-ink);
+  font-weight: 700;
+}
+
+.sfl-nav a:hover,
+.sfl-nav .current-menu-item > a,
+.sfl-nav .current_page_item > a {
+  background: var(--sfl-purple);
+  color: var(--sfl-white);
+}
+
+.sfl-main {
+  max-width: var(--sfl-max);
+  margin: 0 auto;
+  padding: 1.75rem 1.25rem 3rem;
+}
+
+.sfl-page h1,
+.sfl-archive-title {
+  margin: 0 0 1rem;
+  font-size: 2.1rem;
+  line-height: 1.15;
+  color: var(--sfl-navy);
+}
+
+.sfl-content > *:first-child {
+  margin-top: 0;
+}
+
+.sfl-hero {
+  background: linear-gradient(135deg, var(--sfl-purple) 0%, var(--sfl-purple-dark) 55%, #003982 100%);
+  color: var(--sfl-white);
+  padding: 2.5rem 1.25rem 2.75rem;
+}
+
+.sfl-hero-inner {
+  max-width: var(--sfl-max);
+  margin: 0 auto;
+}
+
+.sfl-hero h1 {
+  margin: 0 0 0.6rem;
+  font-size: 2.4rem;
+  line-height: 1.1;
+}
+
+.sfl-hero p {
+  margin: 0 0 1.25rem;
+  max-width: 40rem;
+  font-size: 1.05rem;
+  opacity: 0.95;
+}
+
+.sfl-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.sfl-btn {
+  display: inline-block;
+  padding: 0.7rem 1.15rem;
+  border-radius: 0.35rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.sfl-btn-primary {
+  background: var(--sfl-white);
+  color: var(--sfl-purple);
+}
+
+.sfl-btn-ghost {
+  background: transparent;
+  color: var(--sfl-white);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.75);
+}
+
+.sfl-footer {
+  background: var(--sfl-navy);
+  color: #d5d8dc;
+  padding: 1.5rem 1.25rem;
+  font-size: 0.9rem;
+}
+
+.sfl-footer-inner {
+  max-width: var(--sfl-max);
+  margin: 0 auto;
+}
+
+.sfl-footer a {
+  color: #fff;
+}
+
+/* WP Store Locator sits inside the page column */
+#wpsl-wrap,
+.wpsl-store-locator {
+  margin-top: 0.5rem;
+}
+
+/* Events Shortcodes list */
+.ect-list-wrapper,
+.ect-events-list {
+  margin-top: 1rem;
+}
